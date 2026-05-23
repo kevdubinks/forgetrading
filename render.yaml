@@ -31,7 +31,6 @@ services:
     name: forge-cron
     env: python
     region: frankfurt
-    plan: free
     schedule: "30 12 * * *"
     buildCommand: pip install -r requirements.txt
     startCommand: python scripts/run_daily.py
