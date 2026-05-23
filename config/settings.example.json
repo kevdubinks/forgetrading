@@ -1,0 +1,69 @@
+﻿{
+  "version": "1.0",
+  "crypto_focus": true,
+  "stocks_focus": true,
+  "sources": {
+    "rss_feeds": [
+      "https://cointelegraph.com/rss",
+      "https://cryptopanic.com/news/rss",
+      "https://decrypt.co/feed"
+    ],
+    "reddit_subs": [
+      "CryptoCurrency",
+      "ethereum",
+      "Bitcoin"
+    ],
+    "web_sources": [
+      "https://crypto.news",
+      "https://www.theblock.co"
+    ]
+  },
+  "api_keys_required": [
+    "ETHERSCAN_API_KEY",
+    "CRYPTOPANIC_API_KEY"
+  ],
+  "wallet_tracking": {
+    "ethereum_wallets": [
+      {
+        "address": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+        "label": "Vitalik Buterin"
+      }
+    ],
+    "min_transfer_eth": 5.0,
+    "alert_move_pct": 5.0
+  },
+  "risk_rules": {
+    "max_position_pct": 5,
+    "max_portfolio_risk_pct": 20,
+    "stop_loss_pct": 10
+  },
+  "report": {
+    "format": "markdown",
+    "output_dir": "C:/FORGE/trading/reports"
+  },
+  "api_keys": {
+    "etherscan": "YOUR_ETHERSCAN_API_KEY",
+    "alpaca": {
+      "api_key": "PKA4OLJW2FH7WYCKKYDIBSHKBT",
+      "secret_key": "5XCCoML74ddi6ynwo9AzCmdVY1vgQbyeEWnRnqXwy81f",
+      "base_url": "https://paper-api.alpaca.markets",
+      "paper": true
+    }
+  },
+  "price_tracking": {
+    "coins": [
+      "bitcoin",
+      "ethereum",
+      "solana",
+      "near",
+      "chainlink",
+      "polymath"
+    ],
+    "thresholds": {
+      "surge": 5.0,
+      "drop": -5.0,
+      "extreme_surge": 10.0,
+      "extreme_drop": -10.0
+    }
+  }
+}

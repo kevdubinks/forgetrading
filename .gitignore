@@ -1,0 +1,32 @@
+# === FORGE Trading Agent — .gitignore ===
+
+# Secrets — NE JAMAIS commiter
+config/settings.json
+scripts/_store_keys.py
+scripts/run_report.ps1
+scripts/start_api.ps1
+.env
+
+# Donnees locales — generees a chaque run
+data/*.json
+data/backtest/
+data/cron.log
+!data/supabase_schema.sql
+reports/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# OS
+.DS_Store
+Thumbs.db
+*.tmp
+
+# IDE
+.vscode/
+.idea/

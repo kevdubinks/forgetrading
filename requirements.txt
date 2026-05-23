@@ -1,0 +1,13 @@
+# === FORGE Trading Agent — Dependances Python ===
+# Render (Linux) — gunicorn ne s'installe pas sur Windows, c'est normal.
+
+# Core — Trading
+alpaca-py>=0.43.0,<1.0.0
+requests>=2.31.0,<3.0.0
+
+# API Server (Render Web Service)
+flask>=3.0.0,<4.0.0
+gunicorn>=21.0.0,<23.0.0
+
+# Database — Supabase
+supabase>=2.0.0,<3.0.0
