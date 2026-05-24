@@ -38,6 +38,42 @@ def serve_dashboard():
     p = ROOT / "dashboard.html"
     return send_from_directory(str(ROOT), "dashboard.html") if p.exists() else ("Not found", 404)
 
+@app.route("/api/pnl-curve")
+def api_pnl_curve():
+    """Courbe PnL: dernier backtest + equite live."""
+    try:
+        # Dernier backtest
+        bt_dir = DATA_DIR / "backtest_v2"
+        curves = sorted(bt_dir.glob("v2_*.json"), reverse=True) if bt_dir.exists() else []
+        bt_data = None
+        if curves:
+            with open(curves[0], "r", encoding="utf-8") as f:
+                bt_data = json.load(f)
+        
+        # Live equity
+        live_equity = 100000
+        try:
+            get_client = _import_or_none("alpaca_tracker", "get_alpaca_client")
+            get_account = _import_or_none("alpaca_tracker", "get_account_summary")
+            if get_client and get_account:
+                c = get_client()
+                if c:
+                    a = get_account(c)
+                    if a:
+                        live_equity = float(a.get("equity", 100000))
+        except Exception:
+            pass
+        
+        return jsonify({
+            "backtest": bt_data.get("pnl_curve") if bt_data else [],
+            "backtest_metrics": bt_data.get("metrics") if bt_data else None,
+            "live_equity": live_equity,
+            "timestamp": _now()
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route("/api/health")
 def health():
     return jsonify({"service": "forge-dashboard", "status": "ok", "timestamp": _now()})
