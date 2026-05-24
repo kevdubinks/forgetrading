@@ -88,7 +88,7 @@ def get_rsi_all(coin_ids=None):
     """Get RSI for all tracked coins (1 call per coin = ~4-6 calls)."""
     if coin_ids is None:
         settings = load_settings()
-        coin_ids = settings.get("price_tracking", {}).get("coins", ["bitcoin", "ethereum"])[:4]
+        coin_ids = settings.get("price_tracking", {}).get("coins", ["bitcoin", "ethereum"])
 
     result = {}
     for cid in coin_ids:
