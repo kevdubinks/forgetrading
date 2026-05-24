@@ -1,0 +1,180 @@
+{
+  "backtest": "v2_4criteria",
+  "period": "2026-03-11 -> 2026-05-24",
+  "params": {
+    "tp_pct": 0.2,
+    "sl_pct": -0.1,
+    "position_size": 3000,
+    "max_positions": 3,
+    "conviction_threshold": 40
+  },
+  "metrics": {
+    "total_trades": 0,
+    "closed_trades": 0,
+    "open_at_end": 0,
+    "win_count": 0,
+    "loss_count": 0,
+    "win_rate": 0,
+    "avg_win": 0.0,
+    "avg_loss": 0.0,
+    "total_pnl": 0,
+    "r_r_ratio": 0,
+    "expected_value": 0.0,
+    "max_drawdown_pct": 0,
+    "final_equity": 100000,
+    "return_pct": 0.0
+  },
+  "trades": [],
+  "pnl_curve": [
+    {
+      "date": "2026-04-25",
+      "equity": 100000,
+      "open": 0
+    },
+    {
+      "date": "2026-04-26",
+      "equity": 100000,
+      "open": 0
+    },
+    {
+      "date": "2026-04-27",
+      "equity": 100000,
+      "open": 0
+    },
+    {
+      "date": "2026-04-28",
+      "equity": 100000,
+      "open": 0
+    },
+    {
+      "date": "2026-04-29",
+      "equity": 100000,
+      "open": 0
+    },
+    {
+      "date": "2026-04-30",
+      "equity": 100000,
+      "open": 0
+    },
+    {
+      "date": "2026-05-01",
+      "equity": 100000,
+      "open": 0
+    },
+    {
+      "date": "2026-05-02",
+      "equity": 100000,
+      "open": 0
+    },
+    {
+      "date": "2026-05-03",
+      "equity": 100000,
+      "open": 0
+    },
+    {
+      "date": "2026-05-04",
+      "equity": 100000,
+      "open": 0
+    },
+    {
+      "date": "2026-05-05",
+      "equity": 100000,
+      "open": 0
+    },
+    {
+      "date": "2026-05-06",
+      "equity": 100000,
+      "open": 0
+    },
+    {
+      "date": "2026-05-07",
+      "equity": 100000,
+      "open": 0
+    },
+    {
+      "date": "2026-05-08",
+      "equity": 100000,
+      "open": 0
+    },
+    {
+      "date": "2026-05-09",
+      "equity": 100000,
+      "open": 0
+    },
+    {
+      "date": "2026-05-10",
+      "equity": 100000,
+      "open": 0
+    },
+    {
+      "date": "2026-05-11",
+      "equity": 100000,
+      "open": 0
+    },
+    {
+      "date": "2026-05-12",
+      "equity": 100000,
+      "open": 0
+    },
+    {
+      "date": "2026-05-13",
+      "equity": 100000,
+      "open": 0
+    },
+    {
+      "date": "2026-05-14",
+      "equity": 100000,
+      "open": 0
+    },
+    {
+      "date": "2026-05-15",
+      "equity": 100000,
+      "open": 0
+    },
+    {
+      "date": "2026-05-16",
+      "equity": 100000,
+      "open": 0
+    },
+    {
+      "date": "2026-05-17",
+      "equity": 100000,
+      "open": 0
+    },
+    {
+      "date": "2026-05-18",
+      "equity": 100000,
+      "open": 0
+    },
+    {
+      "date": "2026-05-19",
+      "equity": 100000,
+      "open": 0
+    },
+    {
+      "date": "2026-05-20",
+      "equity": 100000,
+      "open": 0
+    },
+    {
+      "date": "2026-05-21",
+      "equity": 100000,
+      "open": 0
+    },
+    {
+      "date": "2026-05-22",
+      "equity": 100000,
+      "open": 0
+    },
+    {
+      "date": "2026-05-23",
+      "equity": 100000,
+      "open": 0
+    },
+    {
+      "date": "2026-05-24",
+      "equity": 100000,
+      "open": 0
+    }
+  ]
+}
