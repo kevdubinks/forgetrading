@@ -11,8 +11,10 @@ scripts/start_api.ps1
 data/*.json
 data/backtest/
 data/cron.log
+data/agent.log
 !data/supabase_schema.sql
 reports/
+dashboard_template.html
 
 # Python
 __pycache__/
