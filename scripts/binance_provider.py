@@ -159,7 +159,7 @@ def get_enhanced_signals_binance(settings=None):
     prices = get_prices_binance(coins)
 
     # RSI (1 call per coin - Binance has 1200/min, no problem)
-    rsi_data = get_rsi_all(coins[:4])
+    rsi_data = get_rsi_all(coins)  # tous les coins trackes
 
     # BTC Dominance (computed from Binance prices)
     btc_dom = get_btc_dominance_binance()
@@ -168,7 +168,7 @@ def get_enhanced_signals_binance(settings=None):
 
     # Volume ratio from price data
     cs = {}
-    for c in coins[:4]:
+    for c in coins:  # tous les coins trackes
         p = prices.get(c, {})
         r = rsi_data.get(c, {})
         vol24 = p.get("volume_24h", 0)
