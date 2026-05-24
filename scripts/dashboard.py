@@ -583,7 +583,7 @@ button {{ background: var(--color-background-secondary); border: 0.5px solid var
 </body>
 </html>"""
 
-    path = Path("C:/FORGE/trading/dashboard.html")
+    path = Path(__file__).resolve().parent.parent / "dashboard.html"
     with open(path, 'w', encoding='utf-8') as f:
         f.write(html)
 

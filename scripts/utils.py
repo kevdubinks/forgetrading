@@ -1,13 +1,13 @@
 # utils.py — Utilitaires partages pour l'agent de trading
-# Auteur: FORGE | Projet: Trading Agent Phase 1
-# Ce module fournit: logging structure, helpers JSON, formatage dates
+# Auteur: FORGE | Projet: Trading Agent v2.1
+# Compatible Windows + Linux (Render)
 
 import json, os, logging
 from datetime import datetime, timezone
 from pathlib import Path
 
-# === Configuration des chemins ===
-BASE_DIR = Path('C:/FORGE/trading')
+# === Configuration des chemins (dynamique, pas de hardcode) ===
+BASE_DIR = Path(__file__).resolve().parent.parent  # scripts/.. = racine projet
 CONFIG_PATH = BASE_DIR / 'config' / 'settings.json'
 DATA_DIR = BASE_DIR / 'data'
 REPORTS_DIR = BASE_DIR / 'reports'
@@ -18,13 +18,18 @@ WALLET_STATE = DATA_DIR / 'wallet_state.json'
 LOG_FILE = DATA_DIR / 'agent.log'
 
 def setup_logging(name='trading_agent'):
+    """Setup logging: stream toujours, fichier si le dossier data/ existe."""
+    handlers = [logging.StreamHandler()]
+    try:
+        DATA_DIR.mkdir(parents=True, exist_ok=True)
+        handlers.append(logging.FileHandler(LOG_FILE, encoding='utf-8'))
+    except Exception:
+        pass  # Pas de fichier log si dossier inaccessible (ex: Render read-only)
+    
     logging.basicConfig(
         level=logging.INFO,
         format='%(asctime)s [%(levelname)s] %(message)s',
-        handlers=[
-            logging.FileHandler(LOG_FILE, encoding='utf-8'),
-            logging.StreamHandler()
-        ]
+        handlers=handlers
     )
     return logging.getLogger(name)
 
@@ -52,5 +57,3 @@ def today_str():
 
 def ts_to_date(ts):
     return datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M')
-
-print('utils.py: imports OK, paths configured')
