@@ -73,7 +73,7 @@ def _import_or_none(module_name, attr_name):
         mod = __import__(module_name, fromlist=[attr_name])
         return getattr(mod, attr_name, None)
     except Exception as e:
-        logger.warning(f"Import failed {module_name}.{attr_name}: {e}")
+        logger.warning(f"Import failed {module_name}.{attr_name}: {type(e).__name__}: {e}")
         return None
 
 
@@ -88,6 +88,32 @@ def serve_dashboard():
     if dashboard_path.exists():
         return send_from_directory(str(ROOT), "dashboard.html")
     return jsonify({"error": "dashboard.html not found"}), 404
+
+
+@app.route("/api/debug")
+def api_debug():
+    """Endpoint debug: test chaque import et retourne les erreurs detaillees."""
+    import traceback
+    results = {}
+    modules = [
+        ("alpaca_tracker", "get_alpaca_client"),
+        ("binance_provider", "get_prices_binance"),
+        ("decision_engine_v2", "generate_conviction_v2"),
+        ("trade_executor", "execute_trades"),
+        ("signals_enhanced", "get_fear_greed"),
+        ("utils", "load_settings"),
+    ]
+    for mod_name, attr in modules:
+        try:
+            mod = __import__(mod_name, fromlist=[attr])
+            results[mod_name] = "OK"
+        except Exception as e:
+            results[mod_name] = f"{type(e).__name__}: {str(e)[:200]}"
+    
+    results["sys_path"] = sys.path[:5]
+    results["cwd"] = str(Path.cwd())
+    results["scripts_exists"] = str(SCRIPTS.exists()) if SCRIPTS else "N/A"
+    return jsonify(results)
 
 
 @app.route("/api/health")
