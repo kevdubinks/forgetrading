@@ -1,5 +1,6 @@
 # === FORGE Trading Agent — Render Blueprint ===
-# Deploiement: push sur GitHub puis New Blueprint dans Render
+# Web service: API + Dashboard (free tier)
+# Pipeline quotidien: Cron AutoClaw (job 6d79ba5c) -> Supabase -> Dashboard Render
 # Doc: https://render.com/docs/blueprint-spec
 
 services:
@@ -11,29 +12,6 @@ services:
     plan: free
     buildCommand: pip install -r requirements.txt
     startCommand: python api/server.py
-    envVars:
-      - key: ALPACA_API_KEY
-        sync: false
-      - key: ALPACA_SECRET_KEY
-        sync: false
-      - key: ETHERSCAN_API_KEY
-        sync: false
-      - key: SUPABASE_URL
-        sync: false
-      - key: SUPABASE_KEY
-        sync: false
-      - key: DISCORD_WEBHOOK_URL
-        sync: false
-
-  # === Pipeline quotidien (Cron Job) ===
-  # 14h30 Paris = 12h30 UTC (ete) / 13h30 UTC (hiver)
-  - type: cron
-    name: forge-cron
-    env: python
-    region: frankfurt
-    schedule: "30 12 * * *"
-    buildCommand: pip install -r requirements.txt
-    startCommand: python scripts/run_daily.py
     envVars:
       - key: ALPACA_API_KEY
         sync: false
