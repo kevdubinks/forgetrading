@@ -252,7 +252,7 @@ button { background: var(--color-background-secondary); border: 0.5px solid var(
         <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0;">
           <span style="color: var(--color-text-secondary); font-size: 12px;">Trade executor</span><span class="badge b-green">paper auto</span></div>
         <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0;">
-          <span style="color: var(--color-text-secondary); font-size: 12px;">API server</span><span class="badge b-green">localhost:8080</span></div>
+          <span style="color: var(--color-text-secondary); font-size: 12px;">API server</span><span class="badge b-green" id="api-url">auto</span></div>
       </div>
     </div>
   </div>
@@ -295,7 +295,9 @@ button { background: var(--color-background-secondary); border: 0.5px solid var(
 
 // ===== DASHBOARD LIVE FETCH =====
 (function() {
-    var API = "http://127.0.0.1:8080";
+    // API base: auto-detection (Render ou localhost)
+    var API = window.location.protocol + "//" + window.location.host;
+    document.getElementById('api-url').textContent = window.location.host;
     var FALLBACK = {"portfolio_value": 0, "buying_power": 0, "cash": 0, "positions": []};
 
     var els = {
