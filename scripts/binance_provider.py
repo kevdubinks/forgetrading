@@ -181,7 +181,114 @@ def get_enhanced_signals_binance(settings=None):
 
     fg_val = fg["current"]["value"] if fg else "?"
     logger.info(f"Signals (Binance): FG={fg_val} BTC.D={btc_dom}% {len(cs)}coins")
-    return {"fear_greed": fg, "btc_dominance": btc_dom, "coins": cs, "prices": prices}
+
+    # Rolling beta (Gerard)
+    correlation = get_correlation_signals()
+
+    return {"fear_greed": fg, "btc_dominance": btc_dom, "coins": cs, "prices": prices, "correlation": correlation}
+
+
+# === 6. Rolling Beta (Gerard's request — correlation BTC/ETH/SOL) ===
+
+def _daily_returns(symbol, days=90):
+    """Fetch daily close prices and compute log returns."""
+    closes = get_klines(symbol, "1d", days + 1)
+    if len(closes) < 2:
+        return []
+    returns = []
+    for i in range(1, len(closes)):
+        if closes[i-1] > 0 and closes[i] > 0:
+            returns.append((closes[i] - closes[i-1]) / closes[i-1])
+    return returns
+
+
+def _mean(vals):
+    """Simple mean, no numpy dependency."""
+    return sum(vals) / len(vals) if vals else 0
+
+
+def _cov(x, y):
+    """Covariance of two equal-length series."""
+    if len(x) != len(y) or len(x) < 2:
+        return 0
+    mx, my = _mean(x), _mean(y)
+    return sum((xi - mx) * (yi - my) for xi, yi in zip(x, y)) / (len(x) - 1)
+
+
+def _var(x):
+    """Variance."""
+    if len(x) < 2:
+        return 0
+    mx = _mean(x)
+    return sum((xi - mx) ** 2 for xi in x) / (len(x) - 1)
+
+
+def _std(x):
+    """Standard deviation."""
+    v = _var(x)
+    return v ** 0.5 if v > 0 else 0
+
+
+def compute_rolling_beta(symbol_asset, symbol_benchmark, window=30, history=90):
+    """
+    Rolling beta: β = Cov(asset, benchmark) / Var(benchmark)
+    window=30 days glissant, history=90 jours de donnees.
+    Returns (beta_30j, beta_mean_90j, beta_std_90j, warning).
+    """
+    asset_rets = _daily_returns(symbol_asset, history)
+    bench_rets = _daily_returns(symbol_benchmark, history)
+    min_len = min(len(asset_rets), len(bench_rets))
+    if min_len < window:
+        return None
+
+    asset_rets = asset_rets[-min_len:]
+    bench_rets = bench_rets[-min_len:]
+
+    # Rolling betas sur 90j pour calculer mean/std
+    betas_90j = []
+    for i in range(window, min_len + 1):
+        a = asset_rets[i-window:i]
+        b = bench_rets[i-window:i]
+        cv = _cov(a, b)
+        bv = _var(b)
+        if bv > 0:
+            betas_90j.append(cv / bv)
+
+    if not betas_90j:
+        return None
+
+    beta_30j = betas_90j[-1]  # derniere fenetre = 30j les plus recents
+    beta_mean = _mean(betas_90j)
+    beta_std = _std(betas_90j)
+    warning = abs(beta_30j - beta_mean) > 2 * beta_std if beta_std > 0 else False
+
+    return {
+        "beta_30j": round(beta_30j, 3),
+        "beta_mean": round(beta_mean, 3),
+        "beta_std": round(beta_std, 3),
+        "warning": warning,
+        "samples": len(betas_90j)
+    }
+
+
+def get_correlation_signals():
+    """Rolling beta 30j for BTC/ETH, BTC/SOL, ETH/SOL."""
+    pairs = [
+        ("BTCUSDT", "ETHUSDT", "BTC_ETH"),
+        ("BTCUSDT", "SOLUSDT", "BTC_SOL"),
+        ("ETHUSDT", "SOLUSDT", "ETH_SOL")
+    ]
+    result = {}
+    for bench, asset, label in pairs:
+        beta = compute_rolling_beta(asset, bench)
+        if beta:
+            result[label] = beta
+            warn = "[WARNING]" if beta["warning"] else ""
+            logger.info(f"Beta {label}: {beta['beta_30j']} {warn}")
+        else:
+            result[label] = None
+            logger.warning(f"Beta {label}: insufficient data")
+    return result
 
 
 if __name__ == "__main__":
