@@ -133,6 +133,8 @@ button { background: var(--color-background-secondary); border: 0.5px solid var(
         <div style="display: flex; align-items: center; gap: 8px;">
           <span class="coin-price-bitcoin" style="font-size: 13px; color: var(--color-text-secondary);">$77,168.82</span>
           <span class="coin-change-bitcoin badge" style="background: #3B6D1120; color: #3B6D11;">++3.3%</span>
+          <span class="coin-rsi-bitcoin" style="font-size:11px;color:var(--color-text-secondary)">--</span>
+          <span class="coin-vol-bitcoin" style="font-size:11px;color:var(--color-text-secondary)">--</span>
           
         </div>
       </div>
@@ -141,6 +143,8 @@ button { background: var(--color-background-secondary); border: 0.5px solid var(
         <div style="display: flex; align-items: center; gap: 8px;">
           <span class="coin-price-ethereum" style="font-size: 13px; color: var(--color-text-secondary);">$2,123.21</span>
           <span class="coin-change-ethereum badge" style="background: #3B6D1120; color: #3B6D11;">++4.6%</span>
+          <span class="coin-rsi-ethereum" style="font-size:11px;color:var(--color-text-secondary)">--</span>
+          <span class="coin-vol-ethereum" style="font-size:11px;color:var(--color-text-secondary)">--</span>
           
         </div>
       </div>
@@ -149,6 +153,8 @@ button { background: var(--color-background-secondary); border: 0.5px solid var(
         <div style="display: flex; align-items: center; gap: 8px;">
           <span class="coin-price-solana" style="font-size: 13px; color: var(--color-text-secondary);">$86.34</span>
           <span class="coin-change-solana badge" style="background: #3B6D1120; color: #3B6D11;">++4.9%</span>
+          <span class="coin-rsi-solana" style="font-size:11px;color:var(--color-text-secondary)">--</span>
+          <span class="coin-vol-solana" style="font-size:11px;color:var(--color-text-secondary)">--</span>
           
         </div>
       </div>
@@ -157,7 +163,9 @@ button { background: var(--color-background-secondary); border: 0.5px solid var(
         <div style="display: flex; align-items: center; gap: 8px;">
           <span class="coin-price-near" style="font-size: 13px; color: var(--color-text-secondary);">$2.36</span>
           <span class="coin-change-near badge" style="background: #3B6D1120; color: #3B6D11;">++13.2%</span>
-          <span class="badge b-red">RSI 80.9</span>
+          <span class="coin-rsi-near" style="font-size:11px;color:var(--color-text-secondary)">--</span>
+          <span class="coin-vol-near" style="font-size:11px;color:var(--color-text-secondary)">--</span>
+          
         </div>
       </div>
       <div class="row">
@@ -165,6 +173,8 @@ button { background: var(--color-background-secondary); border: 0.5px solid var(
         <div style="display: flex; align-items: center; gap: 8px;">
           <span class="coin-price-chainlink" style="font-size: 13px; color: var(--color-text-secondary);">$9.60</span>
           <span class="coin-change-chainlink badge" style="background: #3B6D1120; color: #3B6D11;">++4.3%</span>
+          <span class="coin-rsi-chainlink" style="font-size:11px;color:var(--color-text-secondary)">--</span>
+          <span class="coin-vol-chainlink" style="font-size:11px;color:var(--color-text-secondary)">--</span>
           
         </div>
       </div>
@@ -173,6 +183,8 @@ button { background: var(--color-background-secondary); border: 0.5px solid var(
         <div style="display: flex; align-items: center; gap: 8px;">
           <span class="coin-price-polymath" style="font-size: 13px; color: var(--color-text-secondary);">$0.27</span>
           <span class="coin-change-polymath badge" style="background: #3B6D1120; color: #3B6D11;">++0.5%</span>
+          <span class="coin-rsi-polymath" style="font-size:11px;color:var(--color-text-secondary)">--</span>
+          <span class="coin-vol-polymath" style="font-size:11px;color:var(--color-text-secondary)">--</span>
           
         </div>
       </div>
@@ -471,6 +483,41 @@ button { background: var(--color-background-secondary); border: 0.5px solid var(
       } catch(e) { console.log("PnL:", e); }
     }
 
+
+    // ---- Correlation widget + DD alert ----
+    async function fetchCorrelation() {
+      try {
+        var r = await fetch(API + "/api/prices");
+        var d = await r.json();
+        var corr = d.correlation || {};
+        var el = document.getElementById("corr-widget");
+        if (!Object.keys(corr).length) { el.innerHTML = "no data"; return; }
+        var html = "";
+        for (var pair in corr) {
+          var c = corr[pair];
+          if (!c) continue;
+          var color = c.warning ? "#f87171" : "var(--color-text)";
+          var warn = c.warning ? " WARN" : "";
+          html += "<div><span style="color:var(--color-text-secondary)">" + pair.replace("_","/") + "</span><br><span style="color:" + color + ";font-weight:500">" + c.beta_30j.toFixed(3) + "</span>" + warn + "<br><span style="font-size:10px;color:#666">moy " + c.beta_mean.toFixed(3) + "</span></div>";
+        }
+        el.innerHTML = html;
+        
+        // Drawdown alert
+        try {
+          var pr = await fetch(API + "/api/portfolio");
+          var pd = await pr.json();
+          if (pd.connected && pd.account && pd.account.equity) {
+            var eq = pd.account.equity;
+            var dd = (100000 - eq) / 100000 * 100;
+            if (dd > 5) {
+              var warnEl = document.getElementById("dd-alert");
+              if (warnEl) warnEl.style.display = "block";
+            }
+          }
+        } catch(e2) {}
+      } catch(e) { console.log("Corr:", e); }
+    }
+
     async function fetchPerformance() {
         try {
             var resp = await fetch(API + "/api/performance");
@@ -536,16 +583,27 @@ button { background: var(--color-background-secondary); border: 0.5px solid var(
             if (!resp.ok) throw new Error("HTTP " + resp.status);
             var data = await resp.json();
             if (data.error) throw new Error(data.error);
+            var coins = data.coins || data;
+            if (!coins || !Object.keys(coins).length) return;
 
-            Object.keys(data).forEach(function(coinId) {
-                var cs = data[coinId];
+            Object.keys(coins).forEach(function(coinId) {
+                var cs = coins[coinId];
                 var priceEl = document.querySelector(".coin-price-" + coinId);
                 var changeEl = document.querySelector(".coin-change-" + coinId);
-                if (priceEl) priceEl.textContent = "$" + cs.price.toLocaleString("en-US", {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                if (changeEl) {
+                var rsiEl = document.querySelector(".coin-rsi-" + coinId);
+                var volEl = document.querySelector(".coin-vol-" + coinId);
+                if (priceEl && cs.price) priceEl.textContent = "$" + cs.price.toLocaleString("en-US", {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                if (changeEl && cs.change_24h != null) {
                     changeEl.textContent = fmtPct(cs.change_24h);
                     changeEl.style.background = coinColor(cs.change_24h) + "20";
                     changeEl.style.color = coinColor(cs.change_24h);
+                }
+                if (rsiEl && cs.rsi != null) {
+                    rsiEl.textContent = cs.rsi.toFixed(1);
+                    rsiEl.style.color = cs.rsi < 30 ? "#4ade80" : cs.rsi > 70 ? "#f87171" : "var(--color-text)";
+                }
+                if (volEl && cs.volume_24h) {
+                    volEl.textContent = "$" + (cs.volume_24h/1e6).toFixed(0) + "M";
                 }
             });
         } catch (e) {
@@ -555,7 +613,7 @@ button { background: var(--color-background-secondary); border: 0.5px solid var(
 
     // INIT
     async function refreshAll() {
-        await Promise.all([fetchPortfolio(), fetchPrices(), fetchPerformance(), fetchPnlCurve()]);
+        await Promise.all([fetchPortfolio(), fetchPrices(), fetchPerformance(), fetchPnlCurve(), fetchCorrelation()]);
     }
 
     refreshAll();
