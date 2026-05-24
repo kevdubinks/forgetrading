@@ -154,6 +154,12 @@ def api_dry_run():
     summary["source"] = "local_json"
     return jsonify(summary)
 
+
+@app.route("/api/performance")
+def api_performance():
+    """Alias for /api/dry-run — dashboard format."""
+    return api_dry_run()
+
 @app.route("/api/trades")
 def api_trades():
     try:
