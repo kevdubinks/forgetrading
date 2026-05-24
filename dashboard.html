@@ -326,7 +326,7 @@ button { background: var(--color-background-secondary); border: 0.5px solid var(
 
 // ===== DASHBOARD LIVE FETCH =====
 (function() {
-    var API = "http://127.0.0.1:8080";
+    var API = window.location.origin;
     var FALLBACK = {"portfolio_value": 0, "buying_power": 0, "cash": 0, "positions": []};
 
     var els = {
