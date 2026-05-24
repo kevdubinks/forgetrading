@@ -806,15 +806,17 @@ window.onerror = function(msg, src, line) { var b = document.getElementById("api
 
 
 
-            els.portfolio.innerHTML = fmtUSD(data.portfolio_value);
+            var acct = data.account || {};
 
-            els.buyingPower.innerHTML = fmtUSD(data.buying_power);
+            els.portfolio.innerHTML = fmtUSD(acct.equity || data.portfolio_value || 0);
+
+            els.buyingPower.innerHTML = fmtUSD(acct.buying_power || data.buying_power || 0);
 
             var nPos = data.positions ? data.positions.length : 0;
 
             els.positions.innerHTML = nPos;
 
-            els.positionsLabel.innerHTML = nPos === 0 ? "Aucun trade actif" : nPos + " actives";
+            els.positionsLabel.innerHTML = nPos === 0 ? "Aucun trade actif" : nPos + " active(s)";
 
             els.equity.innerHTML = "Equity: " + fmtUSD(data.equity) + " · Marché: " + (data.market_open ? "ouvert" : "fermé");
 
@@ -860,9 +862,9 @@ window.onerror = function(msg, src, line) { var b = document.getElementById("api
 
             setApiStatus(false);
 
-            els.portfolio.innerHTML = fmtUSD(FALLBACK.portfolio_value);
+            els.portfolio.innerHTML = "$...";
 
-            els.buyingPower.innerHTML = fmtUSD(FALLBACK.buying_power);
+            els.buyingPower.innerHTML = "$...";
 
             els.positions.innerHTML = "0";
 
