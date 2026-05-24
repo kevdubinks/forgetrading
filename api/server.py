@@ -16,8 +16,11 @@ from flask import Flask, jsonify, send_from_directory, request
 app = Flask(__name__)
 
 @app.after_request
-def add_cors(response):
+def add_headers(response):
     response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
     return response
 
 def _import_or_none(mod_name, attr_name):
