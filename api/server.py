@@ -98,7 +98,16 @@ def api_prices():
                 "rsi": rsi_data.get(coin, {}).get("rsi"),
                 "rsi_signal": rsi_data.get(coin, {}).get("signal")
             }
-        return jsonify({"timestamp": _now(), "coins": result})
+        # Correlation rolling beta (Gerard)
+        correlation = None
+        get_corr = _import_or_none("binance_provider", "get_correlation_signals")
+        if get_corr:
+            try:
+                correlation = get_corr()
+            except Exception:
+                pass
+
+        return jsonify({"timestamp": _now(), "coins": result, "correlation": correlation})
     except Exception as e:
         logger.error(f"/api/prices: {e}")
         return jsonify({"error": str(e)}), 500
