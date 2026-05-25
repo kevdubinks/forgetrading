@@ -85,13 +85,13 @@ def run_decision():
     return conviction
 
 
-def run_trade_executor():
-    """Etape 2: Executer les trades selon le score."""
+def run_trade_executor(conviction):
+    """Etape 2: Executer les trades selon le score de la decision."""
     from trade_executor import execute_trades
     from utils import load_settings
 
     settings = load_settings()
-    result = execute_trades(settings)
+    result = execute_trades(settings, conviction=conviction)
 
     logger.info(f"Trades: {result['action']} | New: {result['new_trades']} | "
                 f"Exits: {result['triggered_exits']} | Open: {result['positions_open']}")
@@ -227,8 +227,8 @@ if __name__ == "__main__":
         return None
     step("STRONG Alert Check", _alert_if_strong)
 
-    # 2. Trade Executor
-    trade_result = step("Trade Executor", run_trade_executor)
+    # 2. Trade Executor (passe la conviction directement, pas de re-lecture fichier)
+    trade_result = step("Trade Executor", lambda: run_trade_executor(conviction))
 
     # 3. Report
     report_data = step("Report Generator", run_report)

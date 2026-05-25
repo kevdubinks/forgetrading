@@ -330,10 +330,10 @@ def generate_dry_run_summary(history):
 
 # === 5. ORCHESTRATION PRINCIPALE ===
 
-def execute_trades(settings=None):
+def execute_trades(settings=None, conviction=None):
     """
     Point d'entree principal — appele par le cron chaque jour.
-    1. Lit la derniere decision
+    1. Utilise la conviction passee en parametre (source unique)
     2. Verifie les positions existantes (TP/SL)
     3. Si conviction >= 50, ouvre de nouvelles positions
     4. Met a jour l'historique et les stats
@@ -341,13 +341,16 @@ def execute_trades(settings=None):
     if settings is None:
         settings = load_settings()
 
-    # Lire la derniere decision
-    decisions = load_json(DECISION_LOG) or []
-    if not decisions:
-        logger.info("Aucune decision disponible — skip trading")
-        return None
+    # Utiliser la conviction passee en parametre (evite re-lecture fichier + desynchro)
+    if conviction is None:
+        decisions = load_json(DECISION_LOG) or []
+        if not decisions:
+            logger.info("Aucune decision disponible — skip trading")
+            return None
+        last_decision = decisions[-1]
+    else:
+        last_decision = conviction
 
-    last_decision = decisions[-1]
     score = last_decision.get("score", 0)
     level = last_decision.get("level", "CALM")
     surge_coins = last_decision.get("surge_coins", [])
@@ -359,7 +362,17 @@ def execute_trades(settings=None):
         logger.info(f"Conviction {score} < {MIN_CONVICTION} — Aucun trade. HOLD.")
         # Quand meme verifier les positions existantes pour TP/SL
         _check_existing_positions(settings)
-        return {"action": "HOLD", "reason": f"Conviction {score} < {MIN_CONVICTION}"}
+        history = load_trade_history()
+        current_positions, _ = _check_existing_positions(settings)
+        return {
+            "action": "HOLD",
+            "reason": f"Conviction {score} < {MIN_CONVICTION}",
+            "conviction": {"score": score, "level": level},
+            "new_trades": 0,
+            "triggered_exits": 0,
+            "positions_open": len([p for p in current_positions if p.get("status") == "OPEN"]),
+            "summary": generate_dry_run_summary(history)
+        }
 
     # === Verifier les positions existantes ===
     current_positions, triggered = _check_existing_positions(settings)
