@@ -4,6 +4,7 @@
 #
 # Etapes:
 #   1. Decision Engine V2 (score conviction + surge_coins)
+#   1.5. STRONG Alert (si >= 75, envoi Discord + fichier + console)
 #   2. Trade Executor (market buy + exit checks)
 #   3. Report Generator (rapport Markdown)
 #   4. Dashboard Generator (dashboard.html)
@@ -212,6 +213,19 @@ if __name__ == "__main__":
 
     # 1. Decision
     conviction = step("Decision Engine V2", run_decision)
+
+    # 1.5. Alerte STRONG (avant execution, pour confirmation humaine)
+    def _alert_if_strong():
+        if not conviction:
+            return None
+        score = conviction.get("score", 0)
+        if score >= 75:
+            from send_alert import send_alert
+            surge = conviction.get("surge_coins", [])
+            return send_alert(conviction, surge)
+        logger.info(f"No STRONG alert (score={score})")
+        return None
+    step("STRONG Alert Check", _alert_if_strong)
 
     # 2. Trade Executor
     trade_result = step("Trade Executor", run_trade_executor)
