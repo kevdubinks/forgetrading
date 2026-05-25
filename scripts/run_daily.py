@@ -236,8 +236,14 @@ if __name__ == "__main__":
     # 4. Dashboard
     step("Dashboard Generator", run_dashboard)
 
-    # 5. Notification (last_alert.json + logs)
+    # 5. Notification (Discord + Gerard briefing)
     step("Notification", lambda: run_notification(report_data, conviction, trade_result))
+
+    # 6. Briefing Gerard (donnees structurees pour l'Agent Finance)
+    def _brief_gerard():
+        from briefing_gerard import build_briefing
+        return build_briefing(conviction, trade_result, report_data)
+    step("Gerard Briefing", _brief_gerard)
 
     duration = (datetime.now(timezone.utc) - start_time).total_seconds()
     logger.info(f"===== FORGE DAILY PIPELINE END: {duration:.1f}s =====")
