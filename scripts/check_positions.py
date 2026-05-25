@@ -1,8 +1,9 @@
-# check_positions.py — Verification horaire TP/SL
+# check_positions.py — Verification horaire TP/SL + Correlation + Stop mental
 # FORGE Trading Agent
-# Lance par cron toutes les heures. Verifie les positions ouvertes
-# contre les prix Binance en temps reel. Ferme si TP ou SL touche.
-# Independance: peut tourner sans le pipeline quotidien.
+# Lance par cron toutes les heures. Verifie:
+#   - TP/SL: ferme si prix atteint
+#   - Stop mental -15%: alerte si drawdown severe
+#   - Correlation ETH/SOL: alerte si beta > 0.95 + positions simultanees
 
 import sys, os
 from pathlib import Path
@@ -78,6 +79,29 @@ def run_check():
                 "coin": coin, "pnl_pct": round(pnl_pct, 1),
                 "entry": entry, "current": current
             }]
+
+    # Alerte correlation: beta ETH/SOL > 0.95 + positions ETH+SOL ouvertes
+    try:
+        open_coins = [p.get("coin", "") for p in open_positions if p.get("status") == "OPEN"]
+        if "ethereum" in open_coins and "solana" in open_coins:
+            from binance_provider import get_correlation_signals
+            corr = get_correlation_signals()
+            eth_sol = corr.get("ETH_SOL", {})
+            beta = eth_sol.get("beta_30j", 0)
+            if beta > 0.95:
+                logger.warning(
+                    f"CORRELATION RISK: beta ETH/SOL={beta:.3f} > 0.95. "
+                    f"Positions ETH+SOL ouvertes simultanement. "
+                    f"Gerard recommande: exposition combinee <= 150% sizing normal."
+                )
+                result["correlation_warnings"] = result.get("correlation_warnings", []) + [{
+                    "pair": "ETH_SOL",
+                    "beta_30j": round(beta, 3),
+                    "threshold": 0.95,
+                    "action": "reduire exposition combinee"
+                }]
+    except Exception as e:
+        logger.warning(f"Correlation check failed: {e}")
 
     return result
 
