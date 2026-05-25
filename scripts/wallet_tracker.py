@@ -20,8 +20,7 @@ def get_etherscan_api_key():
     """Recupere la cle API Etherscan depuis les variables d'environnement."""
     key = os.environ.get('ETHERSCAN_API_KEY', '')
     if not key:
-        settings = load_settings()
-        key = settings.get('api_keys', {}).get('etherscan', '')
+        logger.warning('ETHERSCAN_API_KEY non configuree — wallet tracking desactive')
     return key
 
 def get_eth_balance(address, api_key):
