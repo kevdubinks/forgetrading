@@ -12,12 +12,11 @@ from utils import setup_logging, load_settings
 logger = setup_logging('alpaca_tracker')
 
 def get_alpaca_client(settings=None):
-    if settings is None:
-        settings = load_settings()
-    ac = settings.get('api_keys', {}).get('alpaca', {})
-    api_key = os.environ.get('ALPACA_API_KEY', ac.get('api_key', ''))
-    secret_key = os.environ.get('ALPACA_SECRET_KEY', ac.get('secret_key', ''))
-    paper = ac.get('paper', True)
+    # API keys depuis variables d'environnement UNIQUEMENT
+    # Securite: aucun secret en clair dans settings.json
+    api_key = os.environ.get('ALPACA_API_KEY', '')
+    secret_key = os.environ.get('ALPACA_SECRET_KEY', '')
+    paper = True  # Paper trading uniquement (base URL hardcodee)
     if not api_key or not secret_key or '****' in api_key:
         logger.warning('Alpaca credentials not configured')
         return None
