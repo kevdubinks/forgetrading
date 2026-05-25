@@ -87,6 +87,15 @@ def build_briefing(conviction=None, trade_result=None, report_data=None):
 
     # Sauvegarder
     BRIEFING_FILE.parent.mkdir(parents=True, exist_ok=True)
+
+    # 5. Contexte macro/politique (world_brief)
+    try:
+        from world_brief import add_world_to_briefing
+        briefing = add_world_to_briefing(briefing)
+    except Exception as e:
+        logger.warning(f"World brief failed: {e}")
+        briefing["world_context"] = {"error": str(e)}
+
     with open(BRIEFING_FILE, "w", encoding="utf-8") as f:
         json.dump(briefing, f, indent=2, ensure_ascii=False, default=str)
 
