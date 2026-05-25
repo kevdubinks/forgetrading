@@ -24,8 +24,9 @@ DECISION_LOG = DATA_DIR / "decisions_v2.json"
 # === Configuration trading ===
 MAX_POSITIONS = 3         # Max positions simultanees
 STOP_LOSS_PCT = -0.10     # -10%
-TAKE_PROFIT_PCT = 0.20    # +20%
+TAKE_PROFIT_PCT = 0.21    # +21% (aligne sur R:R backtest 2.11)
 MIN_CONVICTION = 50       # Seuil minimum pour trader
+MAX_GLOBAL_DD = -5000     # Stop global: PnL cumule <= -$5000 -> gel
 
 # Symbol mapping coin_id -> Alpaca symbol
 COIN_TO_ALPACA = {
@@ -379,9 +380,25 @@ def execute_trades(settings=None):
     position_size, conv_level = calculate_position_size(portfolio_value, score)
     logger.info(f"Portfolio: ${portfolio_value:,.0f} | Position: ${position_size:,.0f}")
 
+    # === Verifier le drawdown global (stop loss portfolio) ===
+    history = load_trade_history()
+    closed_trades = [t for t in history if t.get("status") == "CLOSED" and t.get("pnl") is not None]
+    cumulative_pnl = sum(t["pnl"] for t in closed_trades)
+    if cumulative_pnl <= MAX_GLOBAL_DD:
+        logger.error(f"MAX DRAWDOWN ATTEINT: PnL=${cumulative_pnl:,.2f} <= ${MAX_GLOBAL_DD:,}")
+        logger.error("GEL IMMEDIAT — Aucun nouveau trade autorise.")
+        return {
+            "action": "FROZEN",
+            "reason": f"Max drawdown atteint: ${cumulative_pnl:,.2f}",
+            "conviction": {"score": score, "level": level},
+            "new_trades": 0,
+            "triggered_exits": 0,
+            "positions_open": len([p for p in current_positions if p.get("status") == "OPEN"]),
+            "summary": generate_dry_run_summary(history)
+        }
+
     # === Selectionner les coins a trader ===
     prices = get_prices_binance()
-    history = load_trade_history()
     new_trades = []
 
     # Construire la liste de candidats
