@@ -13,6 +13,14 @@ from utils import setup_logging
 
 logger = setup_logging("check_positions")
 
+def _refresh_gerard_briefing():
+    """Met a jour le briefing Gerard avec les dernieres donnees de positions."""
+    try:
+        from briefing_gerard import build_briefing
+        build_briefing()
+    except Exception as e:
+        logger.warning(f"Briefing refresh failed: {e}")
+
 # === Charger les modules trading uniquement si necessaire ===
 
 def run_check():
@@ -29,6 +37,7 @@ def run_check():
     
     if not open_positions and not triggered:
         logger.info("Aucune position ouverte, rien a verifier.")
+        _refresh_gerard_briefing()
         return {"positions_checked": 0, "exits": 0}
 
     result = {
@@ -102,6 +111,9 @@ def run_check():
                 }]
     except Exception as e:
         logger.warning(f"Correlation check failed: {e}")
+
+    # Toujours rafraichir le briefing Gerard avec les dernieres positions
+    _refresh_gerard_briefing()
 
     return result
 
